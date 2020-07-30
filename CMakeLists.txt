@@ -8,4 +8,4 @@ add_subdirectory(src/lib)
 add_subdirectory(src/test)
 
 enable_testing()
-add_test(NAME all_tests COMMAND testchip8)
+add_test(NAME all_tests COMMAND testchip8 -r xml -d yes --order lex)

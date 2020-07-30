@@ -30,6 +30,7 @@
 *.exe
 *.out
 *.app
+src/test/testchip8
 
 #IDE
 .idea/
