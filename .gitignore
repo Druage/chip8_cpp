@@ -31,7 +31,7 @@
 *.out
 *.app
 src/test/testchip8
-
+src/app/appchip8
 #IDE
 .idea/
 cmake-build*/
