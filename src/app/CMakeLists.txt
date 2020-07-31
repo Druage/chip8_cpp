@@ -18,7 +18,8 @@ set(CMAKE_AUTOUIC ON)
 
 find_package(Qt5 COMPONENTS Core Quick Multimedia REQUIRED)
 
-add_executable(${PROJECT_NAME} main.cpp)
+add_executable(${PROJECT_NAME} main.cpp qml/qml.qrc chip8_manager.cpp chip8_manager.h)
 
 target_link_libraries(${PROJECT_NAME} libchip8)
+target_link_libraries(${PROJECT_NAME} Qt5::Core Qt5::Quick Qt5::Multimedia)
 

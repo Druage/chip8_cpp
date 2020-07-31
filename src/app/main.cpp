@@ -1,5 +1,8 @@
 #include <chip8_emu.h>
 #include <iostream>
+#include <QGuiApplication>
+#include <QQmlApplicationEngine>
+#include "chip8_manager.h"
 
 
 bool draw_video_to_console(const uint8_t* vfx, size_t size) {
@@ -22,15 +25,13 @@ bool draw_video_to_console(const uint8_t* vfx, size_t size) {
 }
 
 
-int main() {
-    Chip8Emu emu;
+int main(int argc, char *argv[]) {
+    QGuiApplication app(argc, argv);
 
-    emu.render_video_frame_cb = ::draw_video_to_console;
-    emu.load("roms/INVADERS");
+    qmlRegisterType<Chip8Manager>( "Chip8", 1, 0, "Chip8Manager" );
 
-    while (true) {
-        emu.run();
-    }
+    QQmlApplicationEngine engine;
+    engine.load(QUrl(QStringLiteral("qrc:/main.qml")));
 
-    return 0;
+    return app.exec();
 }

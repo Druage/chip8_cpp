@@ -250,10 +250,10 @@ void Chip8Emu::fetch_op_code() {
                 for (int r = 0; r < sprite_width; ++r) {
                     if ((pixel_row & (0x80 >> r)) != 0) {
 
-                        if (vfx[(x_val + r + ((y_val + y) * 64))] == 1) {
+                        if (vfx[(x_val + r + ((y_val + y) * VFX_HEIGHT))] == 1) {
                             V[0xF] = 1;
                         }
-                        vfx[(x_val + r + ((y_val + y) * 64))] ^= 1;
+                        vfx[(x_val + r + ((y_val + y) * VFX_HEIGHT))] ^= 1;
                     }
                 }
 
