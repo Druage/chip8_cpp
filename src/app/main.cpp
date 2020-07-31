@@ -34,4 +34,15 @@ int main(int argc, char *argv[]) {
     engine.load(QUrl(QStringLiteral("qrc:/main.qml")));
 
     return app.exec();
+
+
+//    Chip8Emu emu;
+//    emu.render_video_frame_cb = draw_video_to_console;
+//    emu.load("roms/INVADERS");
+//
+//    while (true) {
+//        emu.run();
+//    }
+
+    return 0;
 }

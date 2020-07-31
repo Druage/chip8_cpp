@@ -24,8 +24,8 @@ TEST_CASE("All chip8 fields are initialized correctly") {
     REQUIRE(emu.V.size() == 16);
     REQUIRE(is_zeroed_out(emu.V));
 
-    REQUIRE(emu.delay_timer == 60);
-    REQUIRE(emu.sound_timer == 60);
+    REQUIRE(emu.delay_timer == 0);
+    REQUIRE(emu.sound_timer == 0);
 
     REQUIRE(emu.input_keys.size() == 16);
     REQUIRE(is_zeroed_out(emu.input_keys));
@@ -69,11 +69,15 @@ TEST_CASE("0x00EE - Returns from a subroutine.", "[OP_CODE]") {
 
     emu.memory[emu.pc + 0] = 0x00;
     emu.memory[emu.pc + 1] = 0xEE;
+    emu.stack_pointer = 2;
+
+    emu.stack[emu.stack_pointer - 1] = 0xFF;
 
     emu.fetch_op_code();
 
     REQUIRE(emu.i_register == 0);
-    REQUIRE(instruction_was_incremented_normally(emu));
+    REQUIRE(emu.stack_pointer == 1);
+    REQUIRE(emu.pc == 0xFF);
 }
 
 TEST_CASE("0x1NNN - Jumps to address NNN.", "[OP_CODE]") {
@@ -514,7 +518,7 @@ TEST_CASE("0xDXYN - Draws a sprite at coordinate (VX, VY). Sprite is 8x8 pixels"
     Chip8Emu emu;
 
     bool video_cb_was_called = false;
-    emu.render_video_frame_cb = [&](const uint8_t* vfx, std::size_t size) {
+    emu.render_video_frame_cb = [&](const uint8_t *vfx, std::size_t size) {
         video_cb_was_called = true;
 
         REQUIRE(vfx == emu.vfx.data());
@@ -830,6 +834,8 @@ TEST_CASE("Should count down the delay and sound timers by 1 each time the emula
           "[RUN]") {
 
     Chip8Emu emu;
+    emu.delay_timer = 60;
+    emu.sound_timer = 60;
 
     FakeGameFile fakeGameFile;
     REQUIRE_NOTHROW(emu.load(fakeGameFile.file_name));

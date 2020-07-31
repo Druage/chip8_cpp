@@ -10,7 +10,7 @@ Window {
     height: 320
     title: qsTr("Chip8")
 
-    color: "#454444";
+    color: "black";
 
 //    DropShadow {
 //        id: dropShadow;
@@ -25,8 +25,8 @@ Window {
 
     Chip8Manager {
         id: video;
-//        focus: true;
-//        anchors.fill: parent;
+        focus: true;
+        anchors.fill: parent;
     }
 
 }

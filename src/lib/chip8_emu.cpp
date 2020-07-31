@@ -26,7 +26,8 @@ void Chip8Emu::fetch_op_code() {
                     break;
                 }
                 case 0x00EE: {
-                    inc_instruction();
+                    stack_pointer--;
+                    pc = stack[stack_pointer];
                     return;
                 }
                 default:
@@ -250,10 +251,10 @@ void Chip8Emu::fetch_op_code() {
                 for (int r = 0; r < sprite_width; ++r) {
                     if ((pixel_row & (0x80 >> r)) != 0) {
 
-                        if (vfx[(x_val + r + ((y_val + y) * VFX_HEIGHT))] == 1) {
+                        if (vfx[(x_val + r + ((y_val + y) * VFX_WIDTH))] == 1) {
                             V[0xF] = 1;
                         }
-                        vfx[(x_val + r + ((y_val + y) * VFX_HEIGHT))] ^= 1;
+                        vfx[(x_val + r + ((y_val + y) * VFX_WIDTH))] ^= 1;
                     }
                 }
 

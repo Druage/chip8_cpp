@@ -14,8 +14,8 @@ class Chip8Emu {
 public:
     Chip8Emu();
 
-    static const size_t VFX_HEIGHT = 64;
-    static const size_t VFX_WIDTH = 32;
+    static const size_t VFX_WIDTH = 64;
+    static const size_t VFX_HEIGHT = 32;
 
     void fetch_op_code();
 
@@ -64,11 +64,11 @@ public:
 
     std::array<uint8_t, 16> V{0x0};
 
-    uint8_t delay_timer{60};
-    uint8_t sound_timer{60};
+    uint8_t delay_timer{0};
+    uint8_t sound_timer{0};
 
     std::array<uint8_t, 16> input_keys{0x0};
-    std::array<uint8_t, VFX_HEIGHT * VFX_WIDTH> vfx{0x0};
+    std::array<uint8_t, VFX_WIDTH * VFX_HEIGHT> vfx{0x0};
 
     std::vector<uint8_t> game_buffer;
 
