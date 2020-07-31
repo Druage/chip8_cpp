@@ -259,6 +259,10 @@ void Chip8Emu::fetch_op_code() {
 
             }
 
+            if (render_video_frame_cb != nullptr) {
+                render_video_frame_cb(vfx.data(), vfx.size());
+            }
+
             inc_instruction();
             break;
         }
@@ -415,6 +419,23 @@ void Chip8Emu::load(const string &game_path) {
 void Chip8Emu::run() {
     if (!game_loaded_flag) { throw std::runtime_error("A game must be loaded before running"); }
     fetch_op_code();
+    update_timers();
+}
+
+void Chip8Emu::update_timers() {
+
+    if (delay_timer > 0) {
+        --delay_timer;
+    }
+
+    if (sound_timer > 0) {
+        if (sound_timer == 1) {
+            if (play_audio_cb != nullptr) {
+                play_audio_cb();
+            }
+        }
+        --sound_timer;
+    }
 }
 
 #pragma clang diagnostic pop

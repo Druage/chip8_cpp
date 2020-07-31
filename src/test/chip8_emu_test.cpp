@@ -513,6 +513,15 @@ TEST_CASE("0xDXYN - Draws a sprite at coordinate (VX, VY). Sprite is 8x8 pixels"
 
     Chip8Emu emu;
 
+    bool video_cb_was_called = false;
+    emu.render_video_frame_cb = [&](const uint8_t* vfx, std::size_t size) {
+        video_cb_was_called = true;
+
+        REQUIRE(vfx == emu.vfx.data());
+        REQUIRE(size == emu.vfx.size());
+        return true;
+    };
+
     emu.memory[emu.pc + 0] = 0xD1;
     emu.memory[emu.pc + 1] = 0x22;
 
@@ -520,6 +529,22 @@ TEST_CASE("0xDXYN - Draws a sprite at coordinate (VX, VY). Sprite is 8x8 pixels"
     emu.V[2] = 0x00;
 
     emu.fetch_op_code();
+
+    REQUIRE(instruction_was_incremented_normally(emu));
+    REQUIRE(video_cb_was_called);
+}
+
+TEST_CASE("0xDXYN - Should not error out if no video callback was provided", "[OP_CODE]") {
+
+    Chip8Emu emu;
+
+    emu.memory[emu.pc + 0] = 0xD1;
+    emu.memory[emu.pc + 1] = 0x22;
+
+    emu.V[1] = 0x00;
+    emu.V[2] = 0x00;
+
+    REQUIRE_NOTHROW(emu.fetch_op_code());
 
     REQUIRE(instruction_was_incremented_normally(emu));
 }
@@ -757,11 +782,8 @@ TEST_CASE("A game file can be loaded and copied into memory, starting at 0x200 (
 
     Chip8Emu emu;
 
-    std::ofstream test_file("test_file");
-    test_file << "TEST_ROM" << std::endl;
-    test_file.close();
-
-    REQUIRE_NOTHROW(emu.load("test_file"));
+    FakeGameFile fakeGameFile;
+    REQUIRE_NOTHROW(emu.load(fakeGameFile.file_name));
 
     REQUIRE(emu.memory[emu.pc + 0] == 'T');
     REQUIRE(emu.memory[emu.pc + 1] == 'E');
@@ -775,9 +797,6 @@ TEST_CASE("A game file can be loaded and copied into memory, starting at 0x200 (
     REQUIRE(emu.memory[emu.pc + 9] == '\0');
 
     REQUIRE(emu.game_loaded_flag == true);
-
-    REQUIRE(std::remove("test_file") == 0);
-
 }
 
 TEST_CASE("Should throw an error if the game file could not be found", "[LOADING_GAME]") {
@@ -800,13 +819,75 @@ TEST_CASE("Should run the emulator for a single cycle", "[RUN]") {
 
     Chip8Emu emu;
 
-    std::ofstream test_file("test_file");
-    test_file << "TEST_ROM" << std::endl;
-    test_file.close();
-
-    REQUIRE_NOTHROW(emu.load("test_file"));
-    REQUIRE(std::remove("test_file") == 0);
+    FakeGameFile fakeGameFile;
+    REQUIRE_NOTHROW(emu.load(fakeGameFile.file_name));
 
     REQUIRE(emu.game_loaded_flag);
     REQUIRE_NOTHROW(emu.run());
+}
+
+TEST_CASE("Should count down the delay and sound timers by 1 each time the emulator is run when values are above zero",
+          "[RUN]") {
+
+    Chip8Emu emu;
+
+    FakeGameFile fakeGameFile;
+    REQUIRE_NOTHROW(emu.load(fakeGameFile.file_name));
+
+    REQUIRE(emu.game_loaded_flag);
+    REQUIRE_NOTHROW(emu.run());
+
+    REQUIRE(emu.delay_timer == 59);
+    REQUIRE(emu.sound_timer == 59);
+}
+
+TEST_CASE("Should not count down the delay and sound timers because the timer values are 0", "[RUN]") {
+
+    Chip8Emu emu;
+    emu.sound_timer = 0;
+    emu.delay_timer = 0;
+
+    FakeGameFile fakeGameFile;
+    REQUIRE_NOTHROW(emu.load(fakeGameFile.file_name));
+
+    REQUIRE(emu.game_loaded_flag);
+    REQUIRE_NOTHROW(emu.run());
+
+    REQUIRE(emu.delay_timer == 0);
+    REQUIRE(emu.sound_timer == 0);
+}
+
+TEST_CASE("Should call the audio callback when the sound timer is 1", "[RUN]") {
+
+    Chip8Emu emu;
+    emu.sound_timer = 1;
+
+    bool audio_cb_was_called = false;
+    emu.play_audio_cb = [&]() {
+        audio_cb_was_called = true;
+        return true;
+    };
+
+    FakeGameFile fakeGameFile;
+    REQUIRE_NOTHROW(emu.load(fakeGameFile.file_name));
+
+    REQUIRE(emu.game_loaded_flag);
+    REQUIRE_NOTHROW(emu.run());
+
+    REQUIRE(emu.sound_timer == 0);
+    REQUIRE(audio_cb_was_called);
+}
+
+TEST_CASE("Should not error out when the sound timer is 1 and no audio callback was provided", "[RUN]") {
+
+    Chip8Emu emu;
+    emu.sound_timer = 1;
+
+    FakeGameFile fakeGameFile;
+    REQUIRE_NOTHROW(emu.load(fakeGameFile.file_name));
+
+    REQUIRE(emu.game_loaded_flag);
+    REQUIRE_NOTHROW(emu.run());
+
+    REQUIRE(emu.sound_timer == 0);
 }

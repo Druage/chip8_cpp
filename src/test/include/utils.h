@@ -29,7 +29,7 @@ void is_no_op(const Chip8Emu &emu) {
     REQUIRE(is_zeroed_out(emu.stack));
 }
 
-bool instruction_has_not_changed(Chip8Emu& emu) {
+bool instruction_has_not_changed(Chip8Emu &emu) {
     return emu.pc == 0x200;
 }
 
@@ -40,3 +40,19 @@ bool instruction_was_incremented_normally(Chip8Emu &emu) {
 bool next_instruction_was_skipped(Chip8Emu &emu) {
     return emu.pc == 0x200 + 4;
 }
+
+struct FakeGameFile {
+
+    const char *file_name = "test_file";
+    const char file_contents[9] = {'T', 'E', 'S', 'T', '_', 'R', 'O', 'M', '\0'};
+
+    FakeGameFile() {
+        std::ofstream test_file(file_name);
+        test_file << file_contents << std::endl;
+        test_file.close();
+    }
+
+    ~FakeGameFile() {
+        REQUIRE(std::remove(file_name) == 0);
+    }
+};
