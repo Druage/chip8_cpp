@@ -403,7 +403,7 @@ void Chip8Emu::load(const string &game_path) {
 
     std::ifstream game_file(game_path, std::ios::binary);
 
-    if (!game_file.good()) { throw std::runtime_error(""); }
+    if (!game_file.good()) { throw std::runtime_error(game_path + " could not be loaded"); }
 
     std::vector<char> buffer((std::istreambuf_iterator<char>(game_file)),
                              std::istreambuf_iterator<char>());

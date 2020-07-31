@@ -26,7 +26,7 @@ int main() {
     Chip8Emu emu;
 
     emu.render_video_frame_cb = ::draw_video_to_console;
-    emu.load("/home/lee/Downloads/INVADERS");
+    emu.load("roms/INVADERS");
 
     while (true) {
         emu.run();
