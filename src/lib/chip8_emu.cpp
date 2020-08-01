@@ -6,8 +6,10 @@
 #include "chip8_emu.h"
 #include <random>
 #include <fstream>
+#include <cassert>
 
 Chip8Emu::Chip8Emu() {
+    load_fonts_into_memory();
 }
 
 #pragma clang diagnostic push
@@ -451,6 +453,13 @@ void Chip8Emu::update_timers() {
             }
         }
         --sound_timer;
+    }
+}
+
+void Chip8Emu::load_fonts_into_memory() {
+
+    for (int i = FONT_MEMORY_STARTING_LOCATION; i < FONT_MEMORY_SIZE; ++i) {
+        memory[i] = fonts[i];
     }
 }
 

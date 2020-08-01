@@ -19,6 +19,17 @@ auto is_zeroed_out = [](const auto &container) -> bool {
     return all_values_are_zero;
 };
 
+bool game_memory_locations_are_zeroed_out(const Chip8Emu &emu) {
+    bool all_game_memory_locations_are_zeroed_out = true;
+    for (size_t i = Chip8Emu::FONT_MEMORY_SIZE; i < emu.memory.size(); ++i) {
+        if (emu.memory[i] != 0) {
+            all_game_memory_locations_are_zeroed_out = false;
+            break;
+        }
+    }
+    return all_game_memory_locations_are_zeroed_out;
+}
+
 void is_no_op(const Chip8Emu &emu) {
     REQUIRE(emu.stack_pointer == 0);
     REQUIRE(emu.pc == 0x200);

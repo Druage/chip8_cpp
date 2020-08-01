@@ -8,12 +8,12 @@
 #include "include/utils.h"
 #include <chip8_emu.h>
 
-TEST_CASE("All chip8 fields are initialized correctly") {
+TEST_CASE("All chip8 fields are initialized correctly", "[INITIALIZED") {
 
     Chip8Emu emu;
 
     REQUIRE(emu.memory.size() == 4096);
-    REQUIRE(is_zeroed_out(emu.memory));
+    REQUIRE(game_memory_locations_are_zeroed_out(emu));
     REQUIRE(emu.pc == 0x200);
     REQUIRE(emu.i_register == 0);
 
@@ -34,6 +34,15 @@ TEST_CASE("All chip8 fields are initialized correctly") {
     REQUIRE(is_zeroed_out(emu.vfx));
 
     REQUIRE(emu.game_buffer.empty());
+}
+
+TEST_CASE("The fonts [0x0 - 0xF] are stored in the first 80 characters of the memory", "[INITIALIZED]") {
+    Chip8Emu emu;
+
+    for (size_t i = Chip8Emu::FONT_MEMORY_STARTING_LOCATION; i < Chip8Emu::FONT_MEMORY_SIZE; ++i) {
+        REQUIRE(emu.memory[i] == emu.fonts[i]);
+    }
+
 }
 
 TEST_CASE("0x0NNN - NO_OP", "[OP_CODE]") {
@@ -809,7 +818,7 @@ TEST_CASE("Should throw an error if the game file could not be found", "[LOADING
 
     REQUIRE_THROWS_AS(emu.load("BAD_FILE_PATH"), std::runtime_error);
 
-    REQUIRE(is_zeroed_out(emu.memory));
+    REQUIRE(game_memory_locations_are_zeroed_out(emu));
 }
 
 TEST_CASE("Should throw an error if a game was not loaded before running a cycle", "[RUN]") {
