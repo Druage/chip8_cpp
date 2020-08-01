@@ -407,11 +407,11 @@ TEST_CASE("0x8XY7 - Sets VX to VY minus VX. VF is set to 0 because there is a bo
     emu.memory[emu.pc + 1] = 0x27;
 
     emu.V[1] = 0x03;
-    emu.V[2] = 0x04;
+    emu.V[2] = 0x02;
 
     emu.fetch_op_code();
 
-    REQUIRE(emu.V[1] == 0x1);
+    REQUIRE(emu.V[1] == 0xFF);
     REQUIRE(emu.V[0xF] == 0x0);
     REQUIRE(instruction_was_incremented_normally(emu));
 }
@@ -425,11 +425,11 @@ TEST_CASE("0x8XY7 - Sets VX to VY minus VX. VF is set to 1 because there is not 
     emu.memory[emu.pc + 1] = 0x27;
 
     emu.V[1] = 0x03;
-    emu.V[2] = 0x02;
+    emu.V[2] = 0x04;
 
     emu.fetch_op_code();
 
-    REQUIRE(emu.V[1] == 0xFF);
+    REQUIRE(emu.V[1] == 0x1);
     REQUIRE(emu.V[0xF] == 0x1);
     REQUIRE(instruction_was_incremented_normally(emu));
 }
@@ -754,15 +754,29 @@ TEST_CASE(
     emu.memory[emu.pc + 0] = 0xF3;
     emu.memory[emu.pc + 1] = 0x55;
 
-    emu.V[0] = 0x02;
-    emu.V[1] = 0x04;
-    emu.V[2] = 0x08;
+    emu.V[0x00] = 0x00;
+    emu.V[0x01] = 0x01;
+    emu.V[0x02] = 0x02;
+    emu.V[0x03] = 0x03;
+    emu.V[0x04] = 0x04;
+    emu.V[0x05] = 0x05;
+    emu.V[0x06] = 0x06;
+    emu.V[0x07] = 0x07;
+    emu.V[0x08] = 0x08;
+    emu.V[0x09] = 0x09;
+    emu.V[0xA] = 0xA;
+    emu.V[0xB] = 0xB;
+    emu.V[0xC] = 0xC;
+    emu.V[0xD] = 0xD;
+    emu.V[0xE] = 0xE;
+    emu.V[0xF] = 0xF;
 
     emu.fetch_op_code();
 
-    REQUIRE(emu.memory[emu.i_register + 0] == 0x02);
-    REQUIRE(emu.memory[emu.i_register + 1] == 0x04);
-    REQUIRE(emu.memory[emu.i_register + 2] == 0x08);
+    REQUIRE(emu.memory[emu.i_register + 0] == 0x00);
+    REQUIRE(emu.memory[emu.i_register + 1] == 0x01);
+    REQUIRE(emu.memory[emu.i_register + 2] == 0x02);
+    REQUIRE(emu.memory[emu.i_register + 0xF] == 0xF0);
 
     REQUIRE(emu.i_register == 0);
     REQUIRE(instruction_was_incremented_normally(emu));
@@ -774,18 +788,32 @@ TEST_CASE(
 
     Chip8Emu emu;
 
-    emu.memory[emu.pc + 0] = 0xF3;
+    emu.memory[emu.pc + 0] = 0xFF;
     emu.memory[emu.pc + 1] = 0x65;
 
-    emu.memory[emu.i_register + 0] = 0x02;
-    emu.memory[emu.i_register + 1] = 0x04;
-    emu.memory[emu.i_register + 2] = 0x08;
+    emu.memory[emu.i_register + 0x00] = 0x00;
+    emu.memory[emu.i_register + 0x01] = 0x01;
+    emu.memory[emu.i_register + 0x02] = 0x02;
+    emu.memory[emu.i_register + 0x03] = 0x03;
+    emu.memory[emu.i_register + 0x04] = 0x04;
+    emu.memory[emu.i_register + 0x05] = 0x05;
+    emu.memory[emu.i_register + 0x06] = 0x06;
+    emu.memory[emu.i_register + 0x07] = 0x07;
+    emu.memory[emu.i_register + 0x08] = 0x08;
+    emu.memory[emu.i_register + 0x09] = 0x09;
+    emu.memory[emu.i_register + 0xA] = 0xA;
+    emu.memory[emu.i_register + 0xB] = 0xB;
+    emu.memory[emu.i_register + 0xC] = 0xC;
+    emu.memory[emu.i_register + 0xD] = 0xD;
+    emu.memory[emu.i_register + 0xE] = 0xE;
+    emu.memory[emu.i_register + 0xF] = 0xF;
 
     emu.fetch_op_code();
 
-    REQUIRE(emu.V[0] == 0x02);
-    REQUIRE(emu.V[1] == 0x04);
-    REQUIRE(emu.V[2] == 0x08);
+    REQUIRE(emu.V[0] == 0x00);
+    REQUIRE(emu.V[1] == 0x01);
+    REQUIRE(emu.V[2] == 0x02);
+    REQUIRE(emu.V[0xF] == 0xF);
 
     REQUIRE(emu.i_register == 0);
     REQUIRE(instruction_was_incremented_normally(emu));

@@ -117,30 +117,33 @@ void Chip8Emu::fetch_op_code() {
                 }
 
                 case 0x0001: {
-                    V[x_index] = V[x_index] | V[y_index];
+                    V[x_index] |= V[y_index];
                     break;
                 }
 
                 case 0x0002: {
-                    V[x_index] = V[x_index] & V[y_index];
+                    V[x_index] &= V[y_index];
                     break;
                 }
 
                 case 0x0003: {
-                    V[x_index] = V[x_index] ^ V[y_index];
+                    V[x_index] ^= V[y_index];
                     break;
                 }
 
                 case 0x0004: {
 
-                    if (V[y_index] > (0xFF - V[x_index])) {
+                    auto sum = V[x_index] + V[y_index];
+
+                    if (sum > 0xFF) {
                         // Carry
                         V[0xF] = 1;
                     } else {
                         V[0xF] = 0;
                     }
 
-                    V[x_index] += V[y_index];
+                    V[x_index] = sum & 0xFF;
+
                     break;
                 }
 
@@ -171,9 +174,9 @@ void Chip8Emu::fetch_op_code() {
 
                     if (V[y_index] > V[x_index]) {
                         // Borrow
-                        V[0xF] = 0;
-                    } else {
                         V[0xF] = 1;
+                    } else {
+                        V[0xF] = 0;
                     }
 
                     V[x_index] = V[y_index] - V[x_index];
@@ -183,7 +186,7 @@ void Chip8Emu::fetch_op_code() {
 
                 case 0x000E: {
 
-                    V[0xF] = V[x_index] >> 7;
+                    V[0xF] = (V[x_index] & 0x80) >> 7;
                     V[x_index] <<= 1;
 
                     break;
@@ -192,7 +195,6 @@ void Chip8Emu::fetch_op_code() {
                 default:
                     break;
             }
-
 
             inc_instruction();
 
@@ -224,12 +226,13 @@ void Chip8Emu::fetch_op_code() {
 
         case 0xC000: {
             const auto x_index = extract_x_bit(op_code);
+            uint8_t xor_byte = (op_code & 0x00FF);
 
             std::random_device rd;
             std::mt19937 mt(rd());
             std::uniform_int_distribution<std::mt19937::result_type> dist(0, 255);
 
-            V[x_index] = static_cast<uint8_t>(dist(rd) & 0xFF);
+            V[x_index] = static_cast<uint8_t>(dist(rd) & xor_byte);
 
             inc_instruction();
             break;
@@ -253,9 +256,11 @@ void Chip8Emu::fetch_op_code() {
                 for (int r = 0; r < sprite_width; ++r) {
                     if ((pixel_row & (0x80 >> r)) != 0) {
 
+                        // If pixel is on screen, we have a collision detected!
                         if (vfx[(x_val + r + ((y_val + y) * VFX_WIDTH))] == 1) {
                             V[0xF] = 1;
                         }
+
                         vfx[(x_val + r + ((y_val + y) * VFX_WIDTH))] ^= 1;
                     }
                 }
@@ -302,7 +307,7 @@ void Chip8Emu::fetch_op_code() {
                 }
                 case 0x000A: {
 
-                    // Stall waiting for a key press.
+                    // Stall waiting for a key press by not incrementing to current instruction.
                     for (int i = 0; i < input_keys.size(); ++i) {
                         if (input_keys[i] == KeyState::PRESSED) {
                             V[extract_x_bit(op_code)] = i;
@@ -331,6 +336,7 @@ void Chip8Emu::fetch_op_code() {
                     break;
                 }
 
+                // TODO - COME BACK TO THIS! IT MAY NOT BE COMPLETE!!!
                 case 0x0029: {
                     i_register = V[extract_x_bit(op_code)] * 0x5;
                     inc_instruction();
@@ -351,7 +357,7 @@ void Chip8Emu::fetch_op_code() {
                     // dump to memory
 
                     auto x_val = extract_x_bit(op_code);
-                    for (int i = 0; i < x_val; ++i) {
+                    for (int i = 0; i <= x_val; ++i) {
                         memory[i_register + i] = V[i];
                     }
 
@@ -364,7 +370,7 @@ void Chip8Emu::fetch_op_code() {
                     // load from memory
 
                     auto x_val = extract_x_bit(op_code);
-                    for (int i = 0; i < x_val; ++i) {
+                    for (int i = 0; i <= x_val; ++i) {
                         V[i] = memory[i_register + i];
                     }
 
