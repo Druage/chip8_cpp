@@ -764,11 +764,11 @@ TEST_CASE(
     emu.fetch_op_code();
 
     REQUIRE(emu.memory[emu.i_register + 0] == 0x00);
-    REQUIRE(emu.memory[emu.i_register + 1] == 0x01);
-    REQUIRE(emu.memory[emu.i_register + 2] == 0x02);
-    REQUIRE(emu.memory[emu.i_register + 0xF] == 0xF);
+    REQUIRE(emu.memory[emu.i_register + 1] == 0x00);
+    REQUIRE(emu.memory[emu.i_register + 2] == 0x00);
+    REQUIRE(emu.memory[emu.i_register + 0xF] == 0x00);
 
-    REQUIRE(emu.i_register == 1000);
+    REQUIRE(emu.i_register == 1016);
     REQUIRE(instruction_was_incremented_normally(emu));
 }
 

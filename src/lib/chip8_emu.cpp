@@ -306,8 +306,7 @@ void Chip8Emu::fetch_op_code() {
                 case 0x0033: {
                     memory[i_register + 0] = (VX(op_code) / 100);
                     memory[i_register + 1] = (VX(op_code) / 10) % 10;
-                    memory[i_register + 2] = (VX(op_code) % 100) % 10;
-
+                    memory[i_register + 2] = (VX(op_code) % 10);
                     inc_instruction();
                     break;
                 }
@@ -419,7 +418,7 @@ void Chip8Emu::update_timers() {
 
 void Chip8Emu::load_fonts_into_memory() {
 
-    for (int i = FONT_MEMORY_STARTING_LOCATION; i < FONT_MEMORY_SIZE; ++i) {
+    for (int i = 0; i < 80; ++i) {
         memory[i] = fonts[i];
     }
 }

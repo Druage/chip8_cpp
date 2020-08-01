@@ -21,7 +21,7 @@ Chip8Manager::Chip8Manager(QQuickItem *parent)
     // Set up timers and threads and all the gibberish.
     emu_timer.setTimerType(Qt::PreciseTimer);
 
-    emu_timer.setInterval(16/2);
+    emu_timer.setInterval(16);
 
     connect(&emu_timer, &QTimer::timeout, this, &Chip8Manager::play);
 
@@ -36,7 +36,7 @@ Chip8Manager::Chip8Manager(QQuickItem *parent)
         return input_key_buffer[key];
     };
 
-    load("roms/INVADERS");
+    load("roms/PONG");
 
     emu_timer.start();
 
@@ -173,9 +173,7 @@ void Chip8Manager::keyEvent(QKeyEvent *event, uint8_t state) {
             break;
         }
         case Qt::Key_F: {
-
             input_key_buffer[0xF] = state;
-
             break;
         }
         default:
