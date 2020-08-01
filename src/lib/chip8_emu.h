@@ -50,13 +50,19 @@ private:
 
     void update_timers();
 
+    void update_input_key_buffer();
+
     void skip_next_instruction();
 
     void inc_instruction();
 
+
+
     static int extract_x_bit(uint16_t op_code);
 
     static int extract_y_bit(uint16_t op_code);
+
+
 
 public:
     std::array<uint8_t, 4096> memory{0x0};
@@ -78,4 +84,5 @@ public:
 
 public:
     bool game_loaded_flag{false};
+
 };

@@ -420,6 +420,14 @@ void Chip8Emu::load(const string &game_path) {
 void Chip8Emu::run() {
     if (!game_loaded_flag) { throw std::runtime_error("A game must be loaded before running"); }
 
+    update_input_key_buffer();
+
+    fetch_op_code();
+
+    update_timers();
+}
+
+void Chip8Emu::update_input_key_buffer() {
     if (update_input_key_state_cb != nullptr) {
         for (size_t i = 0; i < input_keys.size(); ++i) {
             uint8_t key_state = update_input_key_state_cb(i);
@@ -428,9 +436,6 @@ void Chip8Emu::run() {
             }
         }
     }
-
-    fetch_op_code();
-    update_timers();
 }
 
 void Chip8Emu::update_timers() {
