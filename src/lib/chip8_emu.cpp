@@ -21,22 +21,21 @@ void Chip8Emu::fetch_op_code() {
     switch (op_code & 0xF000) {
 
         case 0x0000: {
-
             switch (op_code & 0x00FF) {
                 case 0x00E0: {
                     vfx.fill(0);
+                    inc_instruction();
                     break;
                 }
                 case 0x00EE: {
-                    stack_pointer--;
+                    --stack_pointer;
                     pc = stack[stack_pointer];
+                    inc_instruction();
                     return;
                 }
                 default:
                     break;
             }
-
-            inc_instruction();
             break;
         }
 
@@ -46,17 +45,14 @@ void Chip8Emu::fetch_op_code() {
         }
 
         case 0x2000: {
-
             stack[stack_pointer] = pc;
-
-            stack_pointer++;
+            ++stack_pointer;
             pc = (op_code & 0x0FFF);
             break;
         }
 
         case 0x3000: {
-            const auto x_index = extract_x_bit(op_code);
-            if (V[x_index] == (op_code & 0x00FF)) {
+            if (VX(op_code) == (op_code & 0x00FF)) {
                 skip_next_instruction();
             } else {
                 inc_instruction();
@@ -65,8 +61,7 @@ void Chip8Emu::fetch_op_code() {
         }
 
         case 0x4000: {
-            const auto x_index = extract_x_bit(op_code);
-            if (V[x_index] != (op_code & 0x00FF)) {
+            if (VX(op_code) != (op_code & 0x00FF)) {
                 skip_next_instruction();
             } else {
                 inc_instruction();
@@ -75,10 +70,7 @@ void Chip8Emu::fetch_op_code() {
         }
 
         case 0x5000: {
-            const auto x_index = extract_x_bit(op_code);
-            const auto y_index = extract_y_bit(op_code);
-
-            if (V[x_index] == V[y_index]) {
+            if (VX(op_code) == VY(op_code)) {
                 skip_next_instruction();
             } else {
                 inc_instruction();
@@ -87,53 +79,42 @@ void Chip8Emu::fetch_op_code() {
         }
 
         case 0x6000: {
-            const auto x_index = extract_x_bit(op_code);
-
-            V[x_index] = (op_code & 0x00FF);
-
+            VX(op_code) = (op_code & 0x00FF);
             inc_instruction();
-
             break;
         }
 
         case 0x7000: {
-            const auto x_index = extract_x_bit(op_code);
-
-            V[x_index] += (op_code & 0x00FF);
-
+            VX(op_code) += (op_code & 0x00FF);
             inc_instruction();
-
             break;
         }
 
         case 0x8000: {
-            const auto x_index = extract_x_bit(op_code);
-            const auto y_index = extract_y_bit(op_code);
 
             switch (op_code & 0x000F) {
                 case 0x0000: {
-                    V[x_index] = V[y_index];
+                    VX(op_code) = VY(op_code);
+                    inc_instruction();
                     break;
                 }
-
                 case 0x0001: {
-                    V[x_index] |= V[y_index];
+                    VX(op_code) |= VY(op_code);
+                    inc_instruction();
                     break;
                 }
-
                 case 0x0002: {
-                    V[x_index] &= V[y_index];
+                    VX(op_code) &= VY(op_code);
+                    inc_instruction();
                     break;
                 }
-
                 case 0x0003: {
-                    V[x_index] ^= V[y_index];
+                    VX(op_code) ^= VY(op_code);
+                    inc_instruction();
                     break;
                 }
-
                 case 0x0004: {
-
-                    auto sum = V[x_index] + V[y_index];
+                    auto sum = VX(op_code) + VY(op_code);
 
                     if (sum > 0xFF) {
                         // Carry
@@ -142,75 +123,59 @@ void Chip8Emu::fetch_op_code() {
                         V[0xF] = 0;
                     }
 
-                    V[x_index] = sum & 0xFF;
-
+                    VX(op_code) = sum & 0xFF;
+                    inc_instruction();
                     break;
                 }
-
                 case 0x0005: {
-
-                    if (V[y_index] > V[x_index]) {
+                    if (VY(op_code) > VX(op_code)) {
                         // Borrow
                         V[0xF] = 0;
                     } else {
                         V[0xF] = 1;
                     }
 
-                    V[x_index] -= V[y_index];
-
+                    VX(op_code) -= VY(op_code);
+                    inc_instruction();
                     break;
                 }
-
                 case 0x0006: {
+                    V[0xF] = (VX(op_code) & 0x1);
 
-                    V[0xF] = (V[x_index] & 0x1);
-
-                    V[x_index] >>= 1;
-
+                    VX(op_code) >>= 1;
+                    inc_instruction();
                     break;
                 }
-
                 case 0x0007: {
-
-                    if (V[y_index] > V[x_index]) {
+                    if (VY(op_code) > VX(op_code)) {
                         // Borrow
                         V[0xF] = 1;
                     } else {
                         V[0xF] = 0;
                     }
 
-                    V[x_index] = V[y_index] - V[x_index];
-
+                    VX(op_code) = VY(op_code) - VX(op_code);
+                    inc_instruction();
                     break;
                 }
-
                 case 0x000E: {
-
-                    V[0xF] = (V[x_index] & 0x80) >> 7;
-                    V[x_index] <<= 1;
-
+                    V[0xF] = (VX(op_code) & 0x80) >> 7;
+                    VX(op_code) <<= 1;
+                    inc_instruction();
                     break;
                 }
-
                 default:
                     break;
             }
-
-            inc_instruction();
-
             break;
         }
 
         case 0x9000: {
-            const auto x_index = extract_x_bit(op_code);
-            const auto y_index = extract_y_bit(op_code);
-
-            if (V[x_index] != V[y_index]) {
+            if (VX(op_code) != VY(op_code)) {
                 skip_next_instruction();
             } else {
                 inc_instruction();
             }
-
             break;
         }
 
@@ -225,22 +190,21 @@ void Chip8Emu::fetch_op_code() {
         }
 
         case 0xC000: {
-            const auto x_index = extract_x_bit(op_code);
             uint8_t xor_byte = (op_code & 0x00FF);
 
             std::random_device rd;
             std::mt19937 mt(rd());
             std::uniform_int_distribution<std::mt19937::result_type> dist(0, 255);
 
-            V[x_index] = static_cast<uint8_t>(dist(rd) & xor_byte);
+            VX(op_code) = static_cast<uint8_t>(dist(rd) & xor_byte);
 
             inc_instruction();
             break;
         }
 
         case 0xD000: {
-            const auto x_val = V[extract_x_bit(op_code)];
-            const auto y_val = V[extract_y_bit(op_code)];
+            const auto x_val = VX(op_code);
+            const auto y_val = VY(op_code);
 
             uint16_t height = op_code & 0x000F;
             uint16_t pixel_row;
@@ -278,14 +242,14 @@ void Chip8Emu::fetch_op_code() {
         case 0xE000: {
             switch (op_code & 0x00FF) {
                 case 0x009E:
-                    if (input_keys[V[extract_x_bit(op_code)]] == KeyState::PRESSED) {
+                    if (input_keys[VX(op_code)] == KeyState::PRESSED) {
                         skip_next_instruction();
                     } else {
                         inc_instruction();
                     }
                     break;
                 case 0x00A1:
-                    if (input_keys[V[extract_x_bit(op_code)]] == KeyState::RELEASED) {
+                    if (input_keys[VX(op_code)] == KeyState::RELEASED) {
                         skip_next_instruction();
                     } else {
                         inc_instruction();
@@ -301,7 +265,7 @@ void Chip8Emu::fetch_op_code() {
 
             switch (op_code & 0x00FF) {
                 case 0x0007: {
-                    V[extract_x_bit(op_code)] = delay_timer;
+                    VX(op_code) = delay_timer;
                     inc_instruction();
                     break;
                 }
@@ -310,7 +274,7 @@ void Chip8Emu::fetch_op_code() {
                     // Stall waiting for a key press by not incrementing to current instruction.
                     for (int i = 0; i < input_keys.size(); ++i) {
                         if (input_keys[i] == KeyState::PRESSED) {
-                            V[extract_x_bit(op_code)] = i;
+                            VX(op_code) = i;
                             inc_instruction();
                             break;
                         }
@@ -319,43 +283,36 @@ void Chip8Emu::fetch_op_code() {
                     break;
                 }
                 case 0x0015: {
-                    delay_timer = V[extract_x_bit(op_code)];
+                    delay_timer = VX(op_code);
                     inc_instruction();
                     break;
                 }
-
                 case 0x0018: {
-                    sound_timer = V[extract_x_bit(op_code)];
+                    sound_timer = VX(op_code);
                     inc_instruction();
                     break;
                 }
-
                 case 0x001E: {
-                    i_register += V[extract_x_bit(op_code)];
+                    i_register += VX(op_code);
                     inc_instruction();
                     break;
                 }
-
-                // TODO - COME BACK TO THIS! IT MAY NOT BE COMPLETE!!!
+                    // TODO - COME BACK TO THIS! IT MAY NOT BE COMPLETE!!!
                 case 0x0029: {
-                    i_register = V[extract_x_bit(op_code)] * 0x5;
+                    i_register = VX(op_code) * 0x5;
                     inc_instruction();
                     break;
                 }
-
                 case 0x0033: {
-                    memory[i_register + 0] = (V[extract_x_bit(op_code)] / 100);
-                    memory[i_register + 1] = (V[extract_x_bit(op_code)] / 10) % 10;
-                    memory[i_register + 2] = (V[extract_x_bit(op_code)] % 100) % 10;
+                    memory[i_register + 0] = (VX(op_code) / 100);
+                    memory[i_register + 1] = (VX(op_code) / 10) % 10;
+                    memory[i_register + 2] = (VX(op_code) % 100) % 10;
 
                     inc_instruction();
                     break;
                 }
-
                 case 0x0055: {
-
                     // dump to memory
-
                     auto x_val = extract_x_bit(op_code);
                     for (int i = 0; i <= x_val; ++i) {
                         memory[i_register + i] = V[i];
@@ -366,9 +323,7 @@ void Chip8Emu::fetch_op_code() {
                 }
 
                 case 0x0065: {
-
                     // load from memory
-
                     auto x_val = extract_x_bit(op_code);
                     for (int i = 0; i <= x_val; ++i) {
                         V[i] = memory[i_register + i];
@@ -467,6 +422,14 @@ void Chip8Emu::load_fonts_into_memory() {
     for (int i = FONT_MEMORY_STARTING_LOCATION; i < FONT_MEMORY_SIZE; ++i) {
         memory[i] = fonts[i];
     }
+}
+
+uint8_t &Chip8Emu::VX(uint16_t opcode) {
+    return V[extract_x_bit(opcode)];
+}
+
+uint8_t &Chip8Emu::VY(uint16_t opcode) {
+    return V[extract_y_bit(opcode)];
 }
 
 #pragma clang diagnostic pop

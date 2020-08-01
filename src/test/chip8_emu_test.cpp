@@ -17,7 +17,7 @@ TEST_CASE("All chip8 fields are initialized correctly", "[INITIALIZED") {
     REQUIRE(emu.pc == 0x200);
     REQUIRE(emu.i_register == 0);
 
-    REQUIRE(emu.stack.size() == 12);
+    REQUIRE(emu.stack.size() == 16);
     REQUIRE(is_zeroed_out(emu.stack));
     REQUIRE(emu.stack_pointer == 0);
 
@@ -43,18 +43,6 @@ TEST_CASE("The fonts [0x0 - 0xF] are stored in the first 80 characters of the me
         REQUIRE(emu.memory[i] == emu.fonts[i]);
     }
 
-}
-
-TEST_CASE("0x0NNN - NO_OP", "[OP_CODE]") {
-
-    Chip8Emu emu;
-    emu.memory[emu.pc + 0] = 0x01;
-    emu.memory[emu.pc + 1] = 0x11;
-
-    emu.fetch_op_code();
-
-    REQUIRE(emu.i_register == 0);
-    REQUIRE(instruction_was_incremented_normally(emu));
 }
 
 TEST_CASE("0x00E0 - Clears the screen", "[OP_CODE]") {
@@ -86,7 +74,7 @@ TEST_CASE("0x00EE - Returns from a subroutine.", "[OP_CODE]") {
 
     REQUIRE(emu.i_register == 0);
     REQUIRE(emu.stack_pointer == 1);
-    REQUIRE(emu.pc == 0xFF);
+    REQUIRE(emu.pc == 0xFF + 0x02);
 }
 
 TEST_CASE("0x1NNN - Jumps to address NNN.", "[OP_CODE]") {
@@ -751,7 +739,9 @@ TEST_CASE(
 
     Chip8Emu emu;
 
-    emu.memory[emu.pc + 0] = 0xF3;
+    emu.i_register = 1000;
+
+    emu.memory[emu.pc + 0] = 0xFF;
     emu.memory[emu.pc + 1] = 0x55;
 
     emu.V[0x00] = 0x00;
@@ -776,9 +766,9 @@ TEST_CASE(
     REQUIRE(emu.memory[emu.i_register + 0] == 0x00);
     REQUIRE(emu.memory[emu.i_register + 1] == 0x01);
     REQUIRE(emu.memory[emu.i_register + 2] == 0x02);
-    REQUIRE(emu.memory[emu.i_register + 0xF] == 0xF0);
+    REQUIRE(emu.memory[emu.i_register + 0xF] == 0xF);
 
-    REQUIRE(emu.i_register == 0);
+    REQUIRE(emu.i_register == 1000);
     REQUIRE(instruction_was_incremented_normally(emu));
 }
 
