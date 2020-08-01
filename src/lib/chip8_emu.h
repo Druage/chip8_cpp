@@ -31,6 +31,7 @@ public:
 public:
     using InputKeyBuffer = std::array<uint8_t, 16>;
 
+    // Callbacks given to frontend applications
 public:
 
     // - [NOT INHERENTLY THREAD SAFE, YOU MUST GUARD THIS FUNCTION CALLS]
@@ -40,6 +41,9 @@ public:
     // [NOT INHERENTLY THREAD SAFE, YOU MUST GUARD THIS FUNCTION CALLS]
     std::function<bool(void)> play_audio_cb;
 
+    // - [NOT INHERENTLY THREAD SAFE, YOU MUST GUARD THIS FUNCTION CALLS]
+    // ARG_1 - The index of the input buffer 0-15.
+    // RETURN_TYPE - The state of the input key passed in as an arg. 0 or 1
     std::function<uint8_t (size_t input_key)> update_input_key_state_cb;
 
 private:
@@ -53,10 +57,6 @@ private:
     static int extract_x_bit(uint16_t op_code);
 
     static int extract_y_bit(uint16_t op_code);
-
-public:
-//    using input_device_cb =  uint8_t (*)(uint8_t hex_key_code);
-    typedef uint8_t (*input_device_cb)(uint8_t hex_key_code);
 
 public:
     std::array<uint8_t, 4096> memory{0x0};
