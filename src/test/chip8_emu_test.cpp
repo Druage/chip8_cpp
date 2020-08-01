@@ -897,3 +897,37 @@ TEST_CASE("Should not error out when the sound timer is 1 and no audio callback 
 
     REQUIRE(emu.sound_timer == 0);
 }
+
+TEST_CASE("Should the input key states when run is called", "[RUN]") {
+
+    Chip8Emu emu;
+
+    for (uint8_t key : emu.input_keys) {
+        REQUIRE(key == 0);
+    }
+
+    bool update_input_key_cb_was_called = false;
+    emu.update_input_key_state_cb = [&](size_t key) -> uint8_t {
+        update_input_key_cb_was_called = true;
+        return 1;
+    };
+
+    FakeGameFile fakeGameFile;
+    REQUIRE_NOTHROW(emu.load(fakeGameFile.file_name));
+
+    REQUIRE_NOTHROW(emu.run());
+    REQUIRE(update_input_key_cb_was_called);
+    for (uint8_t key : emu.input_keys) {
+        REQUIRE(key == 1);
+    }
+}
+
+TEST_CASE("Should not error out when the update input key callback is not provided to the emulator", "[RUN]") {
+
+    Chip8Emu emu;
+
+    FakeGameFile fakeGameFile;
+    REQUIRE_NOTHROW(emu.load(fakeGameFile.file_name));
+
+    REQUIRE_NOTHROW(emu.run());
+}

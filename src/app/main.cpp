@@ -5,15 +5,13 @@
 #include "chip8_manager.h"
 
 
-bool draw_video_to_console(const uint8_t* vfx, size_t size) {
+bool draw_video_to_console(const uint8_t *vfx, size_t size) {
 
     const char draw_char = '|';
 
-    for(int y = 0; y < 32; ++y)
-    {
-        for(int x = 0; x < 64; ++x)
-        {
-            if( vfx[(y*64) + x] == 0)
+    for (int y = 0; y < 32; ++y) {
+        for (int x = 0; x < 64; ++x) {
+            if (vfx[(y * 64) + x] == 0)
                 std::cout << ' ';
             else
                 std::cout << draw_char;
@@ -28,10 +26,10 @@ bool draw_video_to_console(const uint8_t* vfx, size_t size) {
 int main(int argc, char *argv[]) {
     QGuiApplication app(argc, argv);
 
-    qmlRegisterType<Chip8Manager>( "Chip8", 1, 0, "Chip8Manager" );
+    qmlRegisterType<Chip8Manager>("Chip8", 1, 0, "Chip8Manager");
 
     QQmlApplicationEngine engine;
-    engine.load(QUrl(QStringLiteral("qrc:/main.qml")));
+    engine.load(QUrl("qrc:/main.qml"));
 
     return app.exec();
 

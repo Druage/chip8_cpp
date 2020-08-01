@@ -15,13 +15,21 @@ class Chip8Manager : public QQuickItem {
     Q_OBJECT
 public:
     explicit Chip8Manager(QQuickItem *parent = nullptr);
-    ~Chip8Manager();
+    ~Chip8Manager() override;
 
     void load(const QString &game_path);
 
     bool draw_video_frame_cb(const uint8_t *vfx, size_t size);
 
+public:
+
     QSGNode *updatePaintNode( QSGNode *node, UpdatePaintNodeData *paint_data ) override;
+
+    void keyPressEvent(QKeyEvent *event) override;
+    void keyReleaseEvent(QKeyEvent *event) override;
+
+private:
+    void keyEvent(QKeyEvent *event, uint8_t state);
 
 public slots:
 
@@ -32,6 +40,7 @@ private:
     QMutex render_mutex;
 
     QImage vfx_image;
+    Chip8Emu::InputKeyBuffer input_key_buffer;
 
     QTimer emu_timer;
 };

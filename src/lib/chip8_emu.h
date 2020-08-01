@@ -28,6 +28,8 @@ public:
         PRESSED,
     };
 
+public:
+    using InputKeyBuffer = std::array<uint8_t, 16>;
 
 public:
 
@@ -37,6 +39,8 @@ public:
 
     // [NOT INHERENTLY THREAD SAFE, YOU MUST GUARD THIS FUNCTION CALLS]
     std::function<bool(void)> play_audio_cb;
+
+    std::function<uint8_t (size_t input_key)> update_input_key_state_cb;
 
 private:
 
@@ -67,7 +71,7 @@ public:
     uint8_t delay_timer{0};
     uint8_t sound_timer{0};
 
-    std::array<uint8_t, 16> input_keys{0x0};
+    InputKeyBuffer input_keys{0x0};
     std::array<uint8_t, VFX_WIDTH * VFX_HEIGHT> vfx{0x0};
 
     std::vector<uint8_t> game_buffer;

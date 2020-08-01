@@ -33,6 +33,10 @@ Chip8Manager::Chip8Manager(QQuickItem *parent)
         return draw_video_frame_cb(vfx, size);
     };
 
+    emu.update_input_key_state_cb = [this](size_t key) -> uint8_t {
+        return input_key_buffer[key];
+    };
+
     load("roms/INVADERS");
 
     emu_timer.start();
@@ -65,7 +69,6 @@ bool Chip8Manager::draw_video_frame_cb(const uint8_t *vfx, size_t size) {
             }
         }
     }
-    qDebug() << "RUN DRAW FRAME";
 
     // Queue up next frame draw.
     update();
@@ -74,21 +77,9 @@ bool Chip8Manager::draw_video_frame_cb(const uint8_t *vfx, size_t size) {
 
 QSGNode *Chip8Manager::updatePaintNode(QSGNode *node, QQuickItem::UpdatePaintNodeData *) {
 
-//
-//    auto *n = dynamic_cast<QSGSimpleRectNode *>(node);
-//    if (!n) {
-//        n = new QSGSimpleRectNode();
-//        n->setColor(Qt::darkRed);
-//    }
-//    n->setRect(boundingRect());
-//
-//    return n;
-
-
     if (!window() || vfx_image.isNull()) {
         return node;
     }
-
 
     auto *texture_node = dynamic_cast<QSGSimpleTextureNode *>( node );
     if (!texture_node) {
@@ -103,7 +94,94 @@ QSGNode *Chip8Manager::updatePaintNode(QSGNode *node, QQuickItem::UpdatePaintNod
     texture_node->setFiltering(QSGTexture::Nearest);
     texture_node->setOwnsTexture(true);
 
-    qDebug() << "UPDATE PAINT" << boundingRect();
-
     return texture_node;
+}
+
+void Chip8Manager::keyPressEvent(QKeyEvent *event) {
+    keyEvent(event, 1);
+}
+
+void Chip8Manager::keyReleaseEvent(QKeyEvent *event) {
+    keyEvent(event, 0);
+}
+
+void Chip8Manager::keyEvent(QKeyEvent *event, uint8_t state) {
+    switch (event->key()) {
+        case Qt::Key_0: {
+            input_key_buffer[0] = state;
+            break;
+        }
+        case Qt::Key_1: {
+            input_key_buffer[1] = state;
+            break;
+        }
+        case Qt::Key_2: {
+            input_key_buffer[2] = state;
+            break;
+        }
+        case Qt::Key_3: {
+            input_key_buffer[3] = state;
+            break;
+        }
+        case Qt::Key_4: {
+            input_key_buffer[4] = state;
+            break;
+        }
+        case Qt::Key_5: {
+            input_key_buffer[5] = state;
+            break;
+        }
+        case Qt::Key_6: {
+            input_key_buffer[6] = state;
+            break;
+        }
+        case Qt::Key_7: {
+            input_key_buffer[7] = state;
+            break;
+        }
+        case Qt::Key_8: {
+            input_key_buffer[8] = state;
+            break;
+        }
+        case Qt::Key_9: {
+            input_key_buffer[9] = state;
+            break;
+        }
+        case Qt::Key_A: {
+            input_key_buffer[0xA] = state;
+            break;
+        }
+        case Qt::Key_B: {
+            input_key_buffer[0xB] = state;
+            break;
+        }
+        case Qt::Key_C: {
+            input_key_buffer[0xC] = state;
+            break;
+        }
+        case Qt::Key_D: {
+            input_key_buffer[0xD] = state;
+            break;
+        }
+        case Qt::Key_E: {
+            input_key_buffer[0xE] = state;
+            break;
+        }
+        case Qt::Key_F: {
+
+            input_key_buffer[0xF] = state;
+
+            break;
+        }
+        default:
+            event->ignore();
+            break;
+    }
+
+    if (state) {
+        QQuickItem::keyPressEvent(event);
+    } else {
+        QQuickItem::keyReleaseEvent(event);
+    }
+
 }
