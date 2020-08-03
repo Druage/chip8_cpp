@@ -11,38 +11,42 @@
 #include <QtQuick/QQuickItem>
 #include <QtCore/QTimer>
 #include <QtCore/QThread>
+#include "Chip8Worker.h"
 
 class RenderSurface : public QQuickItem {
-    Q_OBJECT
+Q_OBJECT
 public:
     explicit RenderSurface(QQuickItem *parent = nullptr);
+
     ~RenderSurface() override;
 
-    void load(const QString &game_path);
-
-    bool draw_video_frame_cb(const uint8_t *vfx, size_t size);
+    void loadGame(const QString &gamePath);
 
 public:
 
-    QSGNode *updatePaintNode( QSGNode *node, UpdatePaintNodeData *paint_data ) override;
+    QSGNode *updatePaintNode(QSGNode *node, UpdatePaintNodeData *paint_data) override;
 
     void keyPressEvent(QKeyEvent *event) override;
+
     void keyReleaseEvent(QKeyEvent *event) override;
 
-private:
-    void keyEvent(QKeyEvent *event, uint8_t state);
+    void keyEvent(QKeyEvent *event, bool state);
+
+signals:
+
+    void load(const QString &gamePath);
+
+    void run();
+
+    void updateInput(int inputIndex, bool state);
 
 public slots:
 
     void play();
 
 private:
-    Chip8Emu emu;
-    QMutex render_mutex;
+    Chip8Worker chip8Worker;
 
-    QImage vfx_image;
-    Chip8Emu::InputKeyBuffer input_key_buffer;
-
-    QTimer emu_timer;
-    QThread emu_thread;
+    QTimer chip8Timer;
+    QThread chip8WorkerThread;
 };

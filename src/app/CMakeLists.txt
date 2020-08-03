@@ -18,7 +18,7 @@ set(CMAKE_AUTOUIC ON)
 
 find_package(Qt5 COMPONENTS Core Quick Multimedia REQUIRED)
 
-add_executable(${PROJECT_NAME} cpp/main.cpp qml/qml.qrc cpp/RenderSurface.cpp cpp/RenderSurface.h)
+add_executable(${PROJECT_NAME} cpp/main.cpp qml/qml.qrc cpp/RenderSurface.cpp cpp/RenderSurface.h cpp/Chip8Worker.cpp cpp/Chip8Worker.h)
 
 target_link_libraries(${PROJECT_NAME} libchip8)
 target_link_libraries(${PROJECT_NAME} Qt5::Core Qt5::Quick Qt5::Multimedia)

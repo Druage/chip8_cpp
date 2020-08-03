@@ -321,7 +321,7 @@ void Chip8Emu::fetch_op_code() {
                 }
 
                 case 0x0065: {
-                    // load from memory
+                    // loadGame from memory
                     auto x_val = extract_x_bit(op_code);
                     for (int i = 0; i <= x_val; ++i) {
                         V[i] = memory[i_register + i];

@@ -36,7 +36,7 @@ int main(int argc, char *argv[]) {
 
 //    Chip8Emu emu;
 //    emu.render_video_frame_cb = draw_video_to_console;
-//    emu.load("roms/INVADERS");
+//    emu.loadGame("roms/INVADERS");
 //
 //    while (true) {
 //        emu.run();

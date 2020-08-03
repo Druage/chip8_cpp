@@ -11,173 +11,140 @@
 #include "RenderSurface.h"
 
 RenderSurface::RenderSurface(QQuickItem *parent)
-        : QQuickItem(parent),
-          vfx_image(Chip8Emu::VFX_WIDTH, Chip8Emu::VFX_HEIGHT, QImage::Format_ARGB32) {
+        : QQuickItem(parent) {
 
     setFlag(QQuickItem::ItemHasContents, true);
 
-    vfx_image.fill(Qt::black);
+    chip8Timer.setTimerType(Qt::PreciseTimer);
+    chip8Timer.setInterval(1);
 
-    emu_timer.setTimerType(Qt::PreciseTimer);
-    emu_timer.setInterval(16 / 4);
+    connect(&chip8Timer, &QTimer::timeout, this, &RenderSurface::play);
+    connect(&chip8WorkerThread, &QThread::started, &chip8Timer, static_cast<void (QTimer::*)(void)>(&QTimer::start));
+    connect(&chip8WorkerThread, &QThread::finished, &chip8Timer, &QTimer::stop);
 
-    connect(&emu_timer, &QTimer::timeout, this, &RenderSurface::play);
-    connect(&emu_thread, &QThread::started, &emu_timer, static_cast<void (QTimer::*)(void)>(&QTimer::start));
-    connect(&emu_thread, &QThread::finished, &emu_timer, &QTimer::stop);
+    chip8Worker.moveToThread(&chip8WorkerThread);
 
-    emu.render_video_frame_cb = [this](const uint8_t *vfx, size_t size) {
-        Q_CHECK_PTR(vfx);
-        Q_ASSERT(size == Chip8Emu::VFX_WIDTH * Chip8Emu::VFX_HEIGHT);
-        return draw_video_frame_cb(vfx, size);
-    };
+    connect(this, &RenderSurface::run, &chip8Worker, &Chip8Worker::run);
+    connect(this, &RenderSurface::load, &chip8Worker, &Chip8Worker::load);
+    connect(this, &RenderSurface::updateInput, &chip8Worker, &Chip8Worker::updateInput);
+    connect(&chip8Worker, &Chip8Worker::draw, this, &RenderSurface::update);
 
-    emu.update_input_key_state_cb = [this](size_t key) -> uint8_t {
-        return input_key_buffer[key];
-    };
+    loadGame("roms/PONG");
 
-    load("roms/PONG");
-
-    emu_thread.start(QThread::HighestPriority);
+    chip8WorkerThread.start(QThread::HighestPriority);
 }
 
 RenderSurface::~RenderSurface() {
-    emu_thread.quit();
-    emu_thread.wait();
+    chip8WorkerThread.quit();
+    chip8WorkerThread.wait();
 }
 
 void RenderSurface::play() {
-    emu.run();
+    emit run();
 }
 
-void RenderSurface::load(const QString &game_path) {
-    const auto std_game_path = game_path.toStdString();
-    emu.load(std_game_path);
-}
-
-bool RenderSurface::draw_video_frame_cb(const uint8_t *vfx, size_t size) {
-    Q_UNUSED(size)
-
-    render_mutex.lock();
-
-    for (size_t h = 0; h < Chip8Emu::VFX_HEIGHT; ++h) {
-        for (size_t w = 0; w < Chip8Emu::VFX_WIDTH; ++w) {
-            quint8 state = vfx[(w + (h * Chip8Emu::VFX_WIDTH))];
-            if (state == 0) {
-                vfx_image.setPixel(w, h, qRgba(0, 0, 0, 0));
-            } else {
-                vfx_image.setPixel(w, h, qRgba(255, 255, 255, 255));
-            }
-        }
-    }
-
-    render_mutex.unlock();
-
-    // Queue up next frame draw.
-    update();
-    return true;
+void RenderSurface::loadGame(const QString &gamePath) {
+    emit load(gamePath);
 }
 
 QSGNode *RenderSurface::updatePaintNode(QSGNode *node, QQuickItem::UpdatePaintNodeData *) {
 
-    QMutexLocker locker(&render_mutex);
-
-    if (!window() || vfx_image.isNull()) {
+    if (!window()) {
         return node;
     }
 
-    auto *texture_node = dynamic_cast<QSGSimpleTextureNode *>( node );
-    if (!texture_node) {
-        texture_node = new QSGSimpleTextureNode();
+    auto *textureNode = dynamic_cast<QSGSimpleTextureNode *>( node );
+    if (!textureNode) {
+        textureNode = new QSGSimpleTextureNode();
     }
 
-
-    QSGTexture *texture = window()->createTextureFromImage(vfx_image, QQuickWindow::TextureOwnsGLTexture);
-
-    texture_node->setTexture(texture);
-    texture_node->setRect(boundingRect());
-    texture_node->setFiltering(QSGTexture::Nearest);
-    texture_node->setOwnsTexture(true);
-
-    return texture_node;
+    return chip8Worker.createTexture(this, textureNode);
 }
 
 void RenderSurface::keyPressEvent(QKeyEvent *event) {
-    keyEvent(event, 1);
+    keyEvent(event, true);
 }
 
 void RenderSurface::keyReleaseEvent(QKeyEvent *event) {
-    keyEvent(event, 0);
+    keyEvent(event, false);
 }
 
-void RenderSurface::keyEvent(QKeyEvent *event, uint8_t state) {
+void RenderSurface::keyEvent(QKeyEvent *event, bool state) {
+
+    int inputIndex = -1;
+
     switch (event->key()) {
         case Qt::Key_0: {
-            input_key_buffer[0] = state;
+            inputIndex = 0;
             break;
         }
         case Qt::Key_1: {
-            input_key_buffer[1] = state;
+            inputIndex = 1;
             break;
         }
         case Qt::Key_2: {
-            input_key_buffer[2] = state;
+            inputIndex = 2;
             break;
         }
         case Qt::Key_3: {
-            input_key_buffer[3] = state;
+            inputIndex = 3;
             break;
         }
         case Qt::Key_4: {
-            input_key_buffer[4] = state;
+            inputIndex = 4;
             break;
         }
         case Qt::Key_5: {
-            input_key_buffer[5] = state;
+            inputIndex = 5;
             break;
         }
         case Qt::Key_6: {
-            input_key_buffer[6] = state;
+            inputIndex = 6;
             break;
         }
         case Qt::Key_7: {
-            input_key_buffer[7] = state;
+            inputIndex = 7;
             break;
         }
         case Qt::Key_8: {
-            input_key_buffer[8] = state;
+            inputIndex = 8;
             break;
         }
         case Qt::Key_9: {
-            input_key_buffer[9] = state;
+            inputIndex = 9;
             break;
         }
         case Qt::Key_A: {
-            input_key_buffer[0xA] = state;
+            inputIndex = 0xA;
             break;
         }
         case Qt::Key_B: {
-            input_key_buffer[0xB] = state;
+            inputIndex = 0xB;
             break;
         }
         case Qt::Key_C: {
-            input_key_buffer[0xC] = state;
+            inputIndex = 0xC;
             break;
         }
         case Qt::Key_D: {
-            input_key_buffer[0xD] = state;
+            inputIndex = 0xD;
             break;
         }
         case Qt::Key_E: {
-            input_key_buffer[0xE] = state;
+            inputIndex = 0xE;
             break;
         }
         case Qt::Key_F: {
-            input_key_buffer[0xF] = state;
+            inputIndex = 0xF;
             break;
         }
         default:
             event->ignore();
             break;
+    }
+
+    if (inputIndex > -1) {
+        emit updateInput(inputIndex, static_cast<uint8_t>(state));
     }
 
     if (state) {
