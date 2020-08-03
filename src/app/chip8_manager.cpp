@@ -18,13 +18,12 @@ Chip8Manager::Chip8Manager(QQuickItem *parent)
 
     vfx_image.fill(Qt::black);
 
-    // Set up timers and threads and all the gibberish.
     emu_timer.setTimerType(Qt::PreciseTimer);
-
     emu_timer.setInterval(16 / 4);
 
     connect(&emu_timer, &QTimer::timeout, this, &Chip8Manager::play);
-
+    connect(&emu_thread, &QThread::started, &emu_timer, static_cast<void (QTimer::*)(void)>(&QTimer::start));
+    connect(&emu_thread, &QThread::finished, &emu_timer, &QTimer::stop);
 
     emu.render_video_frame_cb = [this](const uint8_t *vfx, size_t size) {
         Q_CHECK_PTR(vfx);
@@ -38,12 +37,12 @@ Chip8Manager::Chip8Manager(QQuickItem *parent)
 
     load("roms/PONG");
 
-    emu_timer.start();
-
+    emu_thread.start(QThread::HighestPriority);
 }
 
 Chip8Manager::~Chip8Manager() {
-    emu_timer.stop();
+    emu_thread.quit();
+    emu_thread.wait();
 }
 
 void Chip8Manager::play() {

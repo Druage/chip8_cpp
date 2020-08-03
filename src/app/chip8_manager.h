@@ -10,6 +10,7 @@
 #include <QtGui/QImage>
 #include <QtQuick/QQuickItem>
 #include <QtCore/QTimer>
+#include <QtCore/QThread>
 
 class Chip8Manager : public QQuickItem {
     Q_OBJECT
@@ -43,4 +44,5 @@ private:
     Chip8Emu::InputKeyBuffer input_key_buffer;
 
     QTimer emu_timer;
+    QThread emu_thread;
 };
