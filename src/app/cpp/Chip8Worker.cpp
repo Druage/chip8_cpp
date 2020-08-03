@@ -3,7 +3,6 @@
 //
 
 #include "Chip8Worker.h"
-#include <QDebug>
 
 Chip8Worker::Chip8Worker(QObject *parent) : QObject(parent),
                                             vfxVideoFrame(Chip8Emu::VFX_WIDTH,
@@ -24,18 +23,26 @@ Chip8Worker::Chip8Worker(QObject *parent) : QObject(parent),
 bool Chip8Worker::drawVideoFrameCb(const uint8_t *vfx, size_t size) {
     Q_CHECK_PTR(vfx);
     Q_ASSERT(size == Chip8Emu::VFX_WIDTH * Chip8Emu::VFX_HEIGHT);
-    QMutexLocker locker(&emuMutex);
+    Q_ASSERT(!vfxVideoFrame.isNull());
 
-    for (size_t h = 0; h < Chip8Emu::VFX_HEIGHT; ++h) {
-        for (size_t w = 0; w < Chip8Emu::VFX_WIDTH; ++w) {
-            quint8 state = vfx[(w + (h * Chip8Emu::VFX_WIDTH))];
-            if (state == 0) {
-                vfxVideoFrame.setPixel(w, h, qRgba(0, 0, 0, 0));
-            } else {
-                vfxVideoFrame.setPixel(w, h, qRgba(255, 255, 255, 255));
-            }
+    emuMutex.lock();
+
+    qDebug() << vfxVideoFrame.size() << vfxVideoFrame.bytesPerLine() << vfxVideoFrame.sizeInBytes();
+
+    for (size_t y = 0; y < vfxVideoFrame.height(); ++y) {
+        for (size_t x = 0; x < vfxVideoFrame.width(); ++x) {
+            auto state = vfx[(x + (y * vfxVideoFrame.width()))];
+
+//            Q_ASSERT(state == 0 || state == 1);
+//            if ((x <= Chip8Emu::VFX_WIDTH && x >= 0) || (y <= Chip8Emu::VFX_HEIGHT && y >= 0)) {
+//                Q_ASSERT(vfxVideoFrame.valid(x, y));
+            vfxVideoFrame.setPixel(x, y, state == 1 ? qRgba(255, 255, 255, 255) : qRgba(0, 0, 0, 0));
+//            }
         }
     }
+
+
+    emuMutex.unlock();
 
     emit draw();
     return true;
@@ -66,8 +73,8 @@ QSGNode *Chip8Worker::createTexture(const QQuickItem *renderSurface, QSGSimpleTe
                                                                           QQuickWindow::TextureOwnsGLTexture);
 
     textureNode->setTexture(texture);
-    textureNode->setRect(renderSurface->boundingRect());
     textureNode->setFiltering(QSGTexture::Nearest);
+    textureNode->setRect(renderSurface->boundingRect());
     textureNode->setOwnsTexture(true);
 
     return textureNode;

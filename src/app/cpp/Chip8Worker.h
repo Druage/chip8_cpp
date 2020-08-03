@@ -31,6 +31,7 @@ public slots:
 
     bool drawVideoFrameCb(const uint8_t *vfx, size_t size);
 
+    // Called from render thread.
     void updateInput(int inputIndex, uint8_t state);
 
 signals:

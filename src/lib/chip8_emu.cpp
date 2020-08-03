@@ -23,7 +23,7 @@ void Chip8Emu::fetch_op_code() {
         case 0x0000: {
             switch (op_code & 0x00FF) {
                 case 0x00E0: {
-                    vfx.fill(0);
+                    vfx.fill(0x0);
                     inc_instruction();
                     break;
                 }
@@ -217,15 +217,15 @@ void Chip8Emu::fetch_op_code() {
 
                 pixel_row = memory[i_register + y];
 
-                for (int r = 0; r < sprite_width; ++r) {
-                    if ((pixel_row & (0x80 >> r)) != 0) {
+                for (int x = 0; x < sprite_width; ++x) {
+                    if ((pixel_row & (0x80 >> x)) != 0) {
 
                         // If pixel is on screen, we have a collision detected!
-                        if (vfx[(x_val + r + ((y_val + y) * VFX_WIDTH))] == 1) {
+                        if (vfx[(x_val + x + ((y_val + y) * VFX_WIDTH))] == 1) {
                             V[0xF] = 1;
                         }
 
-                        vfx[(x_val + r + ((y_val + y) * VFX_WIDTH))] ^= 1;
+                        vfx[(x_val + x + ((y_val + y) * VFX_WIDTH))] ^= 1;
                     }
                 }
 

@@ -16,13 +16,14 @@ RenderSurface::RenderSurface(QQuickItem *parent)
     setFlag(QQuickItem::ItemHasContents, true);
 
     chip8Timer.setTimerType(Qt::PreciseTimer);
-    chip8Timer.setInterval(1);
+    chip8Timer.setInterval(2);
 
     connect(&chip8Timer, &QTimer::timeout, this, &RenderSurface::play);
     connect(&chip8WorkerThread, &QThread::started, &chip8Timer, static_cast<void (QTimer::*)(void)>(&QTimer::start));
     connect(&chip8WorkerThread, &QThread::finished, &chip8Timer, &QTimer::stop);
 
     chip8Worker.moveToThread(&chip8WorkerThread);
+    chip8Timer.moveToThread(&chip8WorkerThread);
 
     connect(this, &RenderSurface::run, &chip8Worker, &Chip8Worker::run);
     connect(this, &RenderSurface::load, &chip8Worker, &Chip8Worker::load);
