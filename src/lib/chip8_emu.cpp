@@ -395,7 +395,6 @@ void Chip8Emu::update_input_key_buffer() {
             uint8_t key_state = update_input_key_state_cb(i);
             input_keys[i] = key_state;
         }
-        std::cout << std::endl;
     }
 }
 
