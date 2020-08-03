@@ -3,7 +3,6 @@
 //
 
 #include <QtGui/QRgb>
-#include <QtQuick/QSGSimpleTextureNode>
 #include <QtQuick/QQuickWindow>
 #include <QtCore/QDebug>
 #include <QtQuick/QSGSimpleRectNode>

@@ -15,8 +15,8 @@ Chip8Worker::Chip8Worker(QObject *parent) : QObject(parent),
         return drawVideoFrameCb(vfx, size);
     };
 
-    emu.update_input_key_state_cb = [this](size_t key) -> uint8_t {
-        return inputKeyBuffer[key];
+    emu.update_input_key_state_cb = [this](size_t index) -> uint8_t {
+        return inputKeyBuffer[index];
     };
 }
 
@@ -24,23 +24,21 @@ bool Chip8Worker::drawVideoFrameCb(const uint8_t *vfx, size_t size) {
     Q_CHECK_PTR(vfx);
     Q_ASSERT(size == Chip8Emu::VFX_WIDTH * Chip8Emu::VFX_HEIGHT);
     Q_ASSERT(!vfxVideoFrame.isNull());
+    Q_ASSERT(vfxVideoFrame.width() == Chip8Emu::VFX_WIDTH && vfxVideoFrame.height() == Chip8Emu::VFX_HEIGHT);
 
     emuMutex.lock();
-
-    qDebug() << vfxVideoFrame.size() << vfxVideoFrame.bytesPerLine() << vfxVideoFrame.sizeInBytes();
 
     for (size_t y = 0; y < vfxVideoFrame.height(); ++y) {
         for (size_t x = 0; x < vfxVideoFrame.width(); ++x) {
             auto state = vfx[(x + (y * vfxVideoFrame.width()))];
 
-//            Q_ASSERT(state == 0 || state == 1);
-//            if ((x <= Chip8Emu::VFX_WIDTH && x >= 0) || (y <= Chip8Emu::VFX_HEIGHT && y >= 0)) {
-//                Q_ASSERT(vfxVideoFrame.valid(x, y));
-            vfxVideoFrame.setPixel(x, y, state == 1 ? qRgba(255, 255, 255, 255) : qRgba(0, 0, 0, 0));
-//            }
+            Q_ASSERT(state == 0 || state == 1);
+            if (!vfxVideoFrame.valid(x, y)) {
+                Q_ASSERT(vfxVideoFrame.valid(x, y));
+            }
+            vfxVideoFrame.setPixel(x, y, state == 1 ? qRgba(0, 255, 255, 255) : qRgba(0, 0, 0, 0));
         }
     }
-
 
     emuMutex.unlock();
 
@@ -58,7 +56,7 @@ void Chip8Worker::run() {
 }
 
 void Chip8Worker::updateInput(int inputIndex, uint8_t state) {
-    Q_ASSERT(inputIndex < inputKeyBuffer.size());
+    Q_ASSERT(inputIndex < inputKeyBuffer.size() && inputIndex >= 0);
     Q_ASSERT(state == 0 || state == 1);
 
     QMutexLocker locker(&emuMutex);

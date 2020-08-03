@@ -225,7 +225,8 @@ void Chip8Emu::fetch_op_code() {
                             V[0xF] = 1;
                         }
 
-                        vfx[(x_val + x + ((y_val + y) * VFX_WIDTH))] ^= 1;
+                        // TODO - Must wrap!!! WRITE TEST!
+                        vfx[(x_val + x + ((y_val + y) * VFX_WIDTH)) % (VFX_WIDTH * VFX_HEIGHT)] ^= 1;
                     }
                 }
 
@@ -392,10 +393,9 @@ void Chip8Emu::update_input_key_buffer() {
     if (update_input_key_state_cb != nullptr) {
         for (size_t i = 0; i < input_keys.size(); ++i) {
             uint8_t key_state = update_input_key_state_cb(i);
-            if (key_state == 0 || key_state == 1) {
-                input_keys[i] = key_state;
-            }
+            input_keys[i] = key_state;
         }
+        std::cout << std::endl;
     }
 }
 
