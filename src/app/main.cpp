@@ -2,7 +2,7 @@
 #include <iostream>
 #include <QGuiApplication>
 #include <QQmlApplicationEngine>
-#include "chip8_manager.h"
+#include "RenderSurface.h"
 
 
 bool draw_video_to_console(const uint8_t *vfx, size_t size) {
@@ -26,7 +26,7 @@ bool draw_video_to_console(const uint8_t *vfx, size_t size) {
 int main(int argc, char *argv[]) {
     QGuiApplication app(argc, argv);
 
-    qmlRegisterType<Chip8Manager>("Chip8", 1, 0, "Chip8Manager");
+    qmlRegisterType<RenderSurface>("Chip8", 1, 0, "RenderSurface");
 
     QQmlApplicationEngine engine;
     engine.load(QUrl("qrc:/main.qml"));

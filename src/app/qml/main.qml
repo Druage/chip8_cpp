@@ -23,7 +23,7 @@ Window {
 //        color: "#80000000"
 //    }
 
-    Chip8Manager {
+    RenderSurface {
         id: video;
         focus: true;
         anchors.fill: parent;

@@ -8,9 +8,9 @@
 #include <QtCore/QDebug>
 #include <QtQuick/QSGSimpleRectNode>
 
-#include "chip8_manager.h"
+#include "RenderSurface.h"
 
-Chip8Manager::Chip8Manager(QQuickItem *parent)
+RenderSurface::RenderSurface(QQuickItem *parent)
         : QQuickItem(parent),
           vfx_image(Chip8Emu::VFX_WIDTH, Chip8Emu::VFX_HEIGHT, QImage::Format_ARGB32) {
 
@@ -21,7 +21,7 @@ Chip8Manager::Chip8Manager(QQuickItem *parent)
     emu_timer.setTimerType(Qt::PreciseTimer);
     emu_timer.setInterval(16 / 4);
 
-    connect(&emu_timer, &QTimer::timeout, this, &Chip8Manager::play);
+    connect(&emu_timer, &QTimer::timeout, this, &RenderSurface::play);
     connect(&emu_thread, &QThread::started, &emu_timer, static_cast<void (QTimer::*)(void)>(&QTimer::start));
     connect(&emu_thread, &QThread::finished, &emu_timer, &QTimer::stop);
 
@@ -40,21 +40,21 @@ Chip8Manager::Chip8Manager(QQuickItem *parent)
     emu_thread.start(QThread::HighestPriority);
 }
 
-Chip8Manager::~Chip8Manager() {
+RenderSurface::~RenderSurface() {
     emu_thread.quit();
     emu_thread.wait();
 }
 
-void Chip8Manager::play() {
+void RenderSurface::play() {
     emu.run();
 }
 
-void Chip8Manager::load(const QString &game_path) {
+void RenderSurface::load(const QString &game_path) {
     const auto std_game_path = game_path.toStdString();
     emu.load(std_game_path);
 }
 
-bool Chip8Manager::draw_video_frame_cb(const uint8_t *vfx, size_t size) {
+bool RenderSurface::draw_video_frame_cb(const uint8_t *vfx, size_t size) {
     Q_UNUSED(size)
 
     render_mutex.lock();
@@ -77,7 +77,7 @@ bool Chip8Manager::draw_video_frame_cb(const uint8_t *vfx, size_t size) {
     return true;
 }
 
-QSGNode *Chip8Manager::updatePaintNode(QSGNode *node, QQuickItem::UpdatePaintNodeData *) {
+QSGNode *RenderSurface::updatePaintNode(QSGNode *node, QQuickItem::UpdatePaintNodeData *) {
 
     QMutexLocker locker(&render_mutex);
 
@@ -101,15 +101,15 @@ QSGNode *Chip8Manager::updatePaintNode(QSGNode *node, QQuickItem::UpdatePaintNod
     return texture_node;
 }
 
-void Chip8Manager::keyPressEvent(QKeyEvent *event) {
+void RenderSurface::keyPressEvent(QKeyEvent *event) {
     keyEvent(event, 1);
 }
 
-void Chip8Manager::keyReleaseEvent(QKeyEvent *event) {
+void RenderSurface::keyReleaseEvent(QKeyEvent *event) {
     keyEvent(event, 0);
 }
 
-void Chip8Manager::keyEvent(QKeyEvent *event, uint8_t state) {
+void RenderSurface::keyEvent(QKeyEvent *event, uint8_t state) {
     switch (event->key()) {
         case Qt::Key_0: {
             input_key_buffer[0] = state;

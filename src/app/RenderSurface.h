@@ -12,11 +12,11 @@
 #include <QtCore/QTimer>
 #include <QtCore/QThread>
 
-class Chip8Manager : public QQuickItem {
+class RenderSurface : public QQuickItem {
     Q_OBJECT
 public:
-    explicit Chip8Manager(QQuickItem *parent = nullptr);
-    ~Chip8Manager() override;
+    explicit RenderSurface(QQuickItem *parent = nullptr);
+    ~RenderSurface() override;
 
     void load(const QString &game_path);
 
