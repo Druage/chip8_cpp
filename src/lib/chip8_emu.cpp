@@ -297,7 +297,6 @@ void Chip8Emu::fetch_op_code() {
                     inc_instruction();
                     break;
                 }
-                    // TODO - COME BACK TO THIS! IT MAY NOT BE COMPLETE!!!
                 case 0x0029: {
                     i_register = VX(op_code) * 0x5;
                     inc_instruction();

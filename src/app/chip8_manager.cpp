@@ -21,7 +21,7 @@ Chip8Manager::Chip8Manager(QQuickItem *parent)
     // Set up timers and threads and all the gibberish.
     emu_timer.setTimerType(Qt::PreciseTimer);
 
-    emu_timer.setInterval(16);
+    emu_timer.setInterval(16 / 4);
 
     connect(&emu_timer, &QTimer::timeout, this, &Chip8Manager::play);
 

@@ -64,8 +64,8 @@ EMU_PUBLIC_FOR_TESTING_PURPOSES:
     static const size_t VFX_WIDTH = 64;
     static const size_t VFX_HEIGHT = 32;
 
-    static const size_t FONT_MEMORY_STARTING_LOCATION = 0x50;
-    static const size_t FONT_MEMORY_SIZE = 0x0A0;
+    static const size_t FONT_MEMORY_STARTING_LOCATION = 0x0;
+    static const size_t FONT_MEMORY_SIZE = 0x50;
 
 
     using InputKeyBuffer = std::array<uint8_t, 16>;
