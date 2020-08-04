@@ -7,8 +7,7 @@
 #include <array>
 #include <vector>
 #include <functional>
-
-using namespace std;
+#include <string>
 
 // This is supposed to do nothing. It is intended for developers to understand what the public API is.
 #define EMU_API /**/

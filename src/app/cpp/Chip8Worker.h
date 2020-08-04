@@ -4,6 +4,7 @@
 
 #pragma once
 
+
 #include <QtCore/QObject>
 #include <chip8_emu.h>
 #include <QtCore/QTimer>

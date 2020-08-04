@@ -362,7 +362,7 @@ int Chip8Emu::extract_y_bit(uint16_t op_code) {
     return (op_code & 0x00F0) >> 4;
 }
 
-void Chip8Emu::load(const string &game_path) {
+void Chip8Emu::load(const std::string &game_path) {
 
     std::ifstream game_file(game_path, std::ios::binary);
 
