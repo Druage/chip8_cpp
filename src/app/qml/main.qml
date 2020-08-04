@@ -4,27 +4,15 @@ import QtQuick.Window 2.2
 import QtGraphicalEffects 1.0
 import Chip8 1.0
 
-Window {
+ApplicationWindow {
     visible: true
-    width: 640
-    height: 320
+    width: 1000
+    height: 500
     title: qsTr("Chip8")
-
     color: "black";
 
-//    DropShadow {
-//        id: dropShadow;
-//        source: video;
-//        anchors.fill: source;
-//        horizontalOffset: 0
-//        verticalOffset: 2
-//        radius: 8.0
-//        samples: radius * 2;
-//        color: "#80000000"
-//    }
-
     RenderSurface {
-        id: video;
+        id: surface;
         focus: true;
         anchors.fill: parent;
     }
