@@ -31,12 +31,7 @@ bool Chip8Worker::drawVideoFrameCb(const uint8_t *vfx, size_t size) {
     for (size_t y = 0; y < vfxVideoFrame.height(); ++y) {
         for (size_t x = 0; x < vfxVideoFrame.width(); ++x) {
             auto state = vfx[(x + (y * vfxVideoFrame.width()))];
-
-            Q_ASSERT(state == 0 || state == 1);
-            if (!vfxVideoFrame.valid(x, y)) {
-                Q_ASSERT(vfxVideoFrame.valid(x, y));
-            }
-            vfxVideoFrame.setPixel(x, y, state == 1 ? qRgba(0, 255, 255, 255) : qRgba(0, 0, 0, 0));
+            vfxVideoFrame.setPixel(x, y, state == 1 ? qRgba(255, 255, 255, 255) : qRgba(0, 0, 0, 0));
         }
     }
 
