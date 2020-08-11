@@ -92,7 +92,13 @@ int main(int argc, char *argv[]) {
     chip8Emu.render_video_frame_cb = drawVideoFrameCb;
 
     SDL_Event e;
+
+    // desired frame rate
+    typedef std::chrono::duration<double, std::ratio<1, 500>> frame_duration;
+
     while (((SDL_PollEvent(&e) || true) && e.type != SDL_QUIT)) {
+
+        auto start = std::chrono::high_resolution_clock::now();
 
         chip8Emu.run();
 
@@ -110,7 +116,9 @@ int main(int argc, char *argv[]) {
             }
         }
 
-        std::this_thread::sleep_for(std::chrono::microseconds(1200));
+        auto end = start + frame_duration(1);
+
+        std::this_thread::sleep_until (end);
     }
 
     SDL_DestroyRenderer(renderer);
