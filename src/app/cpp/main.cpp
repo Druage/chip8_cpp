@@ -91,34 +91,45 @@ int main(int argc, char *argv[]) {
 
     chip8Emu.render_video_frame_cb = drawVideoFrameCb;
 
-    SDL_Event e;
+    Uint64 NOW = SDL_GetPerformanceCounter();
+    Uint64 LAST = 0;
+    double deltaTimeMiliSeconds = 0;
+    double msSum = 0;
+    bool cycle = true;
+    double framesPerMiliSecond = 1.2;
 
-    // desired frame rate
-    typedef std::chrono::duration<double, std::ratio<1, 500>> frame_duration;
+    SDL_Event event;
+    while (((SDL_PollEvent(&event) || true) && event.type != SDL_QUIT)) {
+        LAST = NOW;
 
-    while (((SDL_PollEvent(&e) || true) && e.type != SDL_QUIT)) {
-
-        auto start = std::chrono::high_resolution_clock::now();
-
-        chip8Emu.run();
-
-        if (e.type == SDL_KEYDOWN) {
+        if (event.type == SDL_KEYDOWN) {
             for (int i = 0; i < 16; ++i) {
-                if (e.key.keysym.sym == keymap[i]) {
+                if (event.key.keysym.sym == keymap[i]) {
                     chip8Emu.input_keys[i] = 1;
                 }
             }
-        } else if (e.type == SDL_KEYUP) {
+        } else if (event.type == SDL_KEYUP) {
             for (int i = 0; i < 16; ++i) {
-                if (e.key.keysym.sym == keymap[i]) {
+                if (event.key.keysym.sym == keymap[i]) {
                     chip8Emu.input_keys[i] = 0;
                 }
             }
         }
 
-        auto end = start + frame_duration(1);
+        if ( cycle ) {
+            chip8Emu.run();
+        }
 
-        std::this_thread::sleep_until (end);
+        NOW = SDL_GetPerformanceCounter();
+        deltaTimeMiliSeconds = (double) ((NOW - LAST) * 1000.0 / (double) SDL_GetPerformanceFrequency());
+
+        if (msSum + deltaTimeMiliSeconds >= framesPerMiliSecond) {
+            msSum = (0 + (msSum + deltaTimeMiliSeconds) - framesPerMiliSecond);
+            cycle = true;
+        } else {
+            msSum += deltaTimeMiliSeconds;
+            cycle = false;
+        }
     }
 
     SDL_DestroyRenderer(renderer);
