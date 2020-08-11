@@ -51,13 +51,14 @@ bool drawVideoFrameCb(const uint8_t *vfx, size_t size) {
     SDL_RenderPresent(renderer);
 }
 
-void initSDL() {
+void initSDL(const std::string &gameName) {
     if (SDL_Init(SDL_INIT_VIDEO) < 0) {
         std::cout << "Couldn't initialize SDL: " << SDL_GetError() << std::endl;
         exit(3);
     }
 
-    window = SDL_CreateWindow("Chip8",
+    std::string windowTitle = "CHIP-8 | " + gameName;
+    window = SDL_CreateWindow(windowTitle.data(),
                               SDL_WINDOWPOS_UNDEFINED,
                               SDL_WINDOWPOS_UNDEFINED,
                               WINDOW_WIDTH,
@@ -82,10 +83,11 @@ void initSDL() {
 
 int main(int argc, char *argv[]) {
 
-    initSDL();
+    std::string gameName = "PONG";
+    initSDL(gameName);
 
     Chip8Emu chip8Emu;
-    chip8Emu.load("roms/PONG");
+    chip8Emu.load("roms/" + gameName);
 
     chip8Emu.render_video_frame_cb = drawVideoFrameCb;
 
@@ -100,7 +102,7 @@ int main(int argc, char *argv[]) {
                     chip8Emu.input_keys[i] = 1;
                 }
             }
-        } else if ( e.type == SDL_KEYUP) {
+        } else if (e.type == SDL_KEYUP) {
             for (int i = 0; i < 16; ++i) {
                 if (e.key.keysym.sym == keymap[i]) {
                     chip8Emu.input_keys[i] = 0;
