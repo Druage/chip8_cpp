@@ -18,7 +18,6 @@ endif (CMAKE_BUILD_TYPE STREQUAL "Release")
 message(${CMAKE_BUILD_TYPE})
 
 add_subdirectory(src/app)
-add_subdirectory(src/app_sdl)
 add_subdirectory(src/lib)
 add_subdirectory(src/test)
 

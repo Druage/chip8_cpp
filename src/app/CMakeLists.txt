@@ -12,14 +12,9 @@ if (CMAKE_BUILD_TYPE STREQUAL "Release")
     file(COPY roms DESTINATION ${CMAKE_SOURCE_DIR}/build/Release/bin/)
 endif (CMAKE_BUILD_TYPE STREQUAL "Release")
 
-set(CMAKE_AUTOMOC ON)
-set(CMAKE_AUTORCC ON)
-set(CMAKE_AUTOUIC ON)
+find_package(SDL2 REQUIRED)
 
-find_package(Qt5 COMPONENTS Core Quick Multimedia REQUIRED)
-
-add_executable(${PROJECT_NAME} cpp/main.cpp qml/qml.qrc cpp/RenderSurface.cpp cpp/RenderSurface.h cpp/Chip8Worker.cpp cpp/Chip8Worker.h)
+add_executable(${PROJECT_NAME} cpp/main.cpp)
 
 target_link_libraries(${PROJECT_NAME} libchip8)
-target_link_libraries(${PROJECT_NAME} Qt5::Core Qt5::Quick Qt5::Multimedia)
-
+target_link_libraries(${PROJECT_NAME} SDL2)
